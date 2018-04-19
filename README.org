@@ -1,0 +1,2 @@
+* RabbitMQ Playground!
+Headers exchange play in order to understand them.

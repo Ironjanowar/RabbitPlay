@@ -35,10 +35,11 @@ defmodule RabbitPlay.BasicConsumer do
     {:noreply, state}
   end
 
-  def handle_info({:basic_deliver, payload, _extra}, state) do
-    # extra |> inspect |> Logger.info()
-
+  def handle_info({:basic_deliver, payload, %{delivery_tag: tag}}, %{chan: chan} = state) do
     Logger.info(payload)
+
+    spawn(fn -> Basic.ack(chan, tag) end)
+
     {:noreply, state}
   end
 end

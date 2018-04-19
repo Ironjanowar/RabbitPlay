@@ -1,2 +1,5 @@
 * RabbitMQ Playground!
 Headers exchange play in order to understand them.
+
+** RabbitPlay.Helper.test_publishes/0
+This function tries to implement the example for headers exchange explained in this [[https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html][post]]

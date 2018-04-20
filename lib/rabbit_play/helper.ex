@@ -73,7 +73,26 @@ defmodule RabbitPlay.Helper do
   end
 
   def test_publishes() do
-    consumer_name = "Consumer1"
+    consumer_1_config = %{
+      name: "Consumer1",
+      queues_config: [
+        {"queue_a", [{"format", "pdf"}, {"type", "report"}]}
+      ]
+    }
+
+    consumer_2_config = %{
+      name: "Consumer2",
+      queues_config: [
+        {"queue_b", [{"format", "pdf"}, {"type", "log"}]}
+      ]
+    }
+
+    consumer_3_config = %{
+      name: "Consumer3",
+      queues_config: [
+        {"queue_c", [{"format", "zip"}, {"type", "report"}]}
+      ]
+    }
 
     test_config = [
       {"queue_a", [{"format", "pdf"}, {"type", "report"}]},
@@ -86,7 +105,9 @@ defmodule RabbitPlay.Helper do
     basic_setup(chan, test_config)
 
     # Start consumer
-    BasicConsumer.start_link(chan, consumer_name, test_config)
+    [consumer_1_config, consumer_2_config, consumer_3_config]
+    |> Enum.map(&Map.put(&1, :channel, chan))
+    |> Enum.each(&BasicConsumer.start_link/1)
 
     # This message should reach @queue_a
     publish_with_headers(chan, "Test 1: should reach", [

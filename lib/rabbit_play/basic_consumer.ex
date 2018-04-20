@@ -7,17 +7,19 @@ defmodule RabbitPlay.BasicConsumer do
   require Logger
 
   # Client API
-  def start_link(chan, name, queues_and_arguments) when is_list(queues_and_arguments) do
-    GenServer.start_link(__MODULE__, {chan, name, queues_and_arguments})
+  def start_link(config) when is_map(config) do
+    GenServer.start_link(__MODULE__, config)
   end
 
   # Server callbacks
-  def init({chan, name, queues_and_arguments}) do
-    Helper.basic_setup(chan, queues_and_arguments)
+  def init(%{channel: chan, name: name, queues_config: queues_config}) do
+    Helper.basic_setup(chan, queues_config)
 
-    queues_and_arguments |> Enum.each(fn {queue, _} -> Basic.consume(chan, queue) end)
+    queues_config |> Enum.each(fn {queue, _} -> Basic.consume(chan, queue) end)
 
-    {:ok, %{chan: chan, queues: queues_and_arguments, consumer_name: name}}
+    Logger.info("Consumer #{name} started")
+
+    {:ok, %{chan: chan, queues: queues_config, consumer_name: name}}
   end
 
   # Confirmation sent by the broker after registering this process as a consumer
@@ -36,11 +38,9 @@ defmodule RabbitPlay.BasicConsumer do
   end
 
   def handle_info(
-        {:basic_deliver, payload, %{delivery_tag: tag} = extra},
+        {:basic_deliver, payload, %{delivery_tag: tag}},
         %{chan: chan, consumer_name: name} = state
       ) do
-    Logger.info("EXTRA: #{inspect(extra)}")
-
     spawn(fn ->
       Logger.info("#{name}: #{payload}")
       Basic.ack(chan, tag)

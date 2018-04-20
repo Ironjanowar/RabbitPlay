@@ -72,6 +72,10 @@ defmodule RabbitPlay.Helper do
     )
   end
 
+  def delete_queues(chan, config) do
+    config |> Enum.map(fn {queue, _} -> Queue.delete(chan, queue) end)
+  end
+
   def test_publishes() do
     consumer_1_config = %{
       name: "Consumer1",
@@ -125,5 +129,7 @@ defmodule RabbitPlay.Helper do
       {"type", "log"},
       {"x-match", "all"}
     ])
+
+    {:ok, %{channel: chan, test_config: test_config}}
   end
 end

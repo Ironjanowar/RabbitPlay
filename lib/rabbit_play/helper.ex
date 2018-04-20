@@ -73,6 +73,8 @@ defmodule RabbitPlay.Helper do
   end
 
   def test_publishes() do
+    consumer_name = "Consumer1"
+
     test_config = [
       {"queue_a", [{"format", "pdf"}, {"type", "report"}]},
       {"queue_b", [{"format", "pdf"}, {"type", "log"}]},
@@ -84,7 +86,7 @@ defmodule RabbitPlay.Helper do
     basic_setup(chan, test_config)
 
     # Start consumer
-    BasicConsumer.start_link(chan, test_config)
+    BasicConsumer.start_link(chan, consumer_name, test_config)
 
     # This message should reach @queue_a
     publish_with_headers(chan, "Test 1: should reach", [

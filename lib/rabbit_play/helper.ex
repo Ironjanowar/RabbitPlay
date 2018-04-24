@@ -90,14 +90,14 @@ defmodule RabbitPlay.Helper do
     consumer_2_config = %{
       name: "Consumer2",
       queues_config: [
-        {"queue_b", [{"format", "pdf"}, {"type", "log"}]}
+        {"queue_b", [{"format", "zip"}, {"type", "log"}, {"x-match", "any"}]}
       ]
     }
 
     consumer_3_config = %{
       name: "Consumer3",
       queues_config: [
-        {"queue_c", [{"format", "zip"}, {"type", "report"}]}
+        {"queue_c", [{"format", "zip"}, {"type", "report"}, {"x-match", "all"}]}
       ]
     }
 
@@ -129,16 +129,14 @@ defmodule RabbitPlay.Helper do
     ])
 
     # This message should reach @queue_a and @queue_b
-    publish_with_headers(chan, "Test 2: should reach", [
-      {"format", "pdf"},
-      {"x-match", "any"}
+    publish_with_headers(chan, "Test 2: should not reach", [
+      {"format", "pdf"}
     ])
 
     # This message should not reach any queue
-    publish_with_headers(chan, "Test 3: should not reach", [
+    publish_with_headers(chan, "Test 3: should reach", [
       {"format", "zip"},
-      {"type", "log"},
-      {"x-match", "all"}
+      {"type", "report"}
     ])
 
     {:ok, %{channel: chan, test_config: test_config}}

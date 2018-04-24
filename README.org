@@ -86,6 +86,7 @@ Lets bind "queue_b" and send some examples:
 #+END_SRC
 
 These are the exchange's bindings:
+
 [[./images/exchange_bindings.png]]
 
 So, if we send a message with ~[{"format", "pdf"}]~ it will only go to
@@ -107,7 +108,9 @@ Basic.publish(chan, "test_headers", "", "Hello there", headers: [{"format", "pdf
 amqp will ignore the routing key)
 
 This only arrives to queue_a:
+
 [[./images/first_message.png]]
+
 (Trust me is queue_a)
 
 
@@ -123,9 +126,11 @@ Now lets try sending the other message:
 #+END_SRC
 
 This will be queue_a:
+
 [[./images/second_time_queue_a.png]]
 
 And this well be queue_b:
+
 [[./images/second_time_queue_b.png]]
 
 NICE! Now experiment yourself with the headers exchange and let me now

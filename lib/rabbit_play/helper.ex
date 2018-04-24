@@ -125,12 +125,14 @@ defmodule RabbitPlay.Helper do
     # This message should reach @queue_a
     publish_with_headers(chan, "Test 1: should reach", [
       {"format", "pdf"},
-      {"type", "report"},
-      {"x-match", "all"}
+      {"type", "report"}
     ])
 
     # This message should reach @queue_a and @queue_b
-    publish_with_headers(chan, "Test 2: should reach", [{"format", "pdf"}, {"x-match", "any"}])
+    publish_with_headers(chan, "Test 2: should reach", [
+      {"format", "pdf"},
+      {"x-match", "any"}
+    ])
 
     # This message should not reach any queue
     publish_with_headers(chan, "Test 3: should not reach", [

@@ -5,7 +5,7 @@ defmodule RabbitPlay.Helper do
 
   require Logger
 
-  @exchange "argeements"
+  @exchange "agreements"
 
   @queue_a "queue_a"
   @queue_b "queue_b"
@@ -73,7 +73,10 @@ defmodule RabbitPlay.Helper do
   end
 
   def delete_queues(chan, config) do
-    config |> Enum.map(fn {queue, _} -> Queue.delete(chan, queue) end)
+    config
+    |> Enum.map(fn %{queues_config: queues_config} -> queues_config end)
+    |> List.flatten()
+    |> Enum.map(fn {queue, _} -> Queue.delete(chan, queue) end)
   end
 
   def test_publishes() do
@@ -99,17 +102,23 @@ defmodule RabbitPlay.Helper do
     }
 
     test_config = [
-      {"queue_a", [{"format", "pdf"}, {"type", "report"}]},
-      {"queue_b", [{"format", "pdf"}, {"type", "log"}]},
-      {"queue_c", [{"format", "zip"}, {"type", "report"}]}
+      consumer_1_config,
+      consumer_2_config,
+      consumer_3_config
     ]
+
+    # Get queues_config from test_config
+    queues_config =
+      test_config
+      |> Enum.map(fn %{queues_config: queues_config} -> queues_config end)
+      |> List.flatten()
 
     # Config connection and channel
     {:ok, chan} = get_channel()
-    basic_setup(chan, test_config)
+    basic_setup(chan, queues_config)
 
-    # Start consumer
-    [consumer_1_config, consumer_2_config, consumer_3_config]
+    # Add channel to consumer config and start consumer
+    test_config
     |> Enum.map(&Map.put(&1, :channel, chan))
     |> Enum.each(&BasicConsumer.start_link/1)
 

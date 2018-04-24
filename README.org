@@ -65,9 +65,9 @@ Now we have our ~queue_a~ binded to the exchange ~test_headers~ with these argum
 The ~x-match~ parameter can only be ~any~ or ~all~:
  - *any:* lets in any message that contains any of the parameters
    described. /For example:/ A message with headers -> ~[{"format",
-   "pdf"}]~, will pass. But a message with headers -> ~[{"type",
-   "invent"}, {"param", "random"}]~ will not, because "type" is not
-   "log" and "param" is not even listed on the binding.
+   "pdf"}]~, will pass. But a message with headers -> ~[{"format",
+   "invent"}, {"param", "random"}]~ will not, because "format" is not
+   "pdf" and "param" is not even listed on the binding.
  - *all:* forces that the message has *all* the parameters that the
    binding has. /For example:/ A message with headers -> ~[{"format",
    "pdf"}, {"type", "log"}]~ will pass, because "x-match" is always

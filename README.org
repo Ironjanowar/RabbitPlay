@@ -2,4 +2,131 @@
 Headers exchange play in order to understand them.
 
 ** RabbitPlay.Helper.test_publishes/0
-This function tries to implement the example for headers exchange explained in this [[https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html][post]]
+This function tries to implement the example for headers exchange
+explained in this [[https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html][post]] (that it seems to be bad, so I'll explain how
+headers exchange work)
+
+* How Headers Exchange works
+This is a simple exercise to learn how to use ~headers exchange~.
+
+First of all, declaration:
+#+BEGIN_SRC elixir
+Exchange.declare(chan, exchange_name, type, options)
+#+END_SRC
+
+We'll need a channel ~chan~, an exchange name ~exchange_name~, and a
+type of exchange ~type~, options are optional, for example:
+#+BEGIN_SRC elixir
+Exchange.declare(chan, "test_headers", :headers, durable: true)
+#+END_SRC
+
+In order to obtain the channel we need a connection, all this is
+obtained with:
+#+BEGIN_SRC elixir
+use AMQP
+
+{:ok, conn} = Connection.open("amqp://guest:guest@localhost")
+{:ok, chan} = Channel.open(conn)
+#+END_SRC
+(Suposing that we have a RabbitMQ server in localhost with the user
+~guest~ and password ~guest~)
+
+After that, we need some queues, lets say:
+#+BEGIN_SRC elixir
+Queue.declare(chan, "queue_a", durable: true)
+Queue.declare(chan, "queue_b", durable: true)
+#+END_SRC
+
+Now for the bindings, and here is where the interesting part starts!
+In the binding we define which type of message (according to the
+headers) we want to pass to the queue, lets see an example of a binding:
+
+The binding function looks like this:
+#+BEGIN_SRC elixir
+Queue.bind(chan, queue_name, exchange_name, options)
+#+END_SRC
+
+This binds the queue named ~queue_name~ to the exchange
+~exchange_name~ with the options ~options~, here is a concrete example:
+#+BEGIN_SRC elixir
+  Queue.bind(
+    chan,
+    "queue_a",
+    "test_headers",
+    arguments: [{"format", "pdf"}, {"type", "log"}, {"x-match", "any"}]
+  )
+#+END_SRC
+
+Now we have our ~queue_a~ binded to the exchange ~test_headers~ with these arguments:
+#+BEGIN_SRC elixir
+[{"format", "pdf"}, {"type", "log"}, {"x-match", "any"}]
+#+END_SRC
+
+The ~x-match~ parameter can only be ~any~ or ~all~:
+ - *any:* lets in any message that contains any of the parameters
+   described. /For example:/ A message with headers -> ~[{"format",
+   "pdf"}]~, will pass. But a message with headers -> ~[{"type",
+   "invent"}, {"param", "random"}]~ will not, because "type" is not
+   "log" and "param" is not even listed on the binding.
+ - *all:* forces that the message has *all* the parameters that the
+   binding has. /For example:/ A message with headers -> ~[{"format",
+   "pdf"}, {"type", "log"}]~ will pass, because "x-match" is always
+   ignored by amqp. A message with headers -> ~[{"format", "zip"}]~
+   will not pass, because neither "format" is "pdf" or "type" is
+   specified.
+
+Lets bind "queue_b" and send some examples:
+#+BEGIN_SRC elixir
+  Queue.bind(
+    chan,
+    "queue_b",
+    "test_headers",
+    arguments: [{"format", "zip"}, {"type", "log"}, {"x-match", "all"}]
+  )
+#+END_SRC
+
+These are the exchange's bindings:
+[[./images/exchange_bindings.png]]
+
+So, if we send a message with ~[{"format", "pdf"}]~ it will only go to
+"queue_a" and if we send a message with ~[{"format", "zip"}, {"type",
+"log"}]~ it will be sent to both queues, lets see this in action.
+
+First send to queue_a only:
+
+The publish function looks like this:
+#+BEGIN_SRC elixir
+Basic.publish(chan, exchange_name, routing_key, message_text, options)
+#+END_SRC
+
+Here is a concrete example:
+#+BEGIN_SRC elixir
+Basic.publish(chan, "test_headers", "", "Hello there", headers: [{"format", "pdf"}])
+#+END_SRC
+(Note that routing_key is "", since we are using a headers exchange
+amqp will ignore the routing key)
+
+This only arrives to queue_a:
+[[./images/first_message.png]]
+(Trust me is queue_a)
+
+
+Now lets try sending the other message:
+#+BEGIN_SRC elixir
+  Basic.publish(
+    chan,
+    "test_headers",
+    "",
+    "Hello there second time",
+    headers: [{"format", "zip"}, {"type", "log"}]
+  )
+#+END_SRC
+
+This will be queue_a:
+[[./images/second_time_queue_a.png]]
+
+And this well be queue_b:
+[[./images/second_time_queue_b.png]]
+
+NICE! Now experiment yourself with the headers exchange and let me now
+if this helped you :D

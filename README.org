@@ -3,7 +3,7 @@ Headers exchange play in order to understand them.
 
 ** RabbitPlay.Helper.test_publishes/0
 This function tries to implement the example for headers exchange
-explained in this [[https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html][post]] (that it seems to be bad, so I'll explain how
+explained in this [[https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html][post]] (that it seems to be wrong, so I'll explain how
 headers exchange work)
 
 * How Headers Exchange works
@@ -85,7 +85,7 @@ Lets bind "queue_b" and send some examples:
   )
 #+END_SRC
 
-These are the exchange's bindings:
+These are the exchange bindings:
 
 [[./images/exchange_bindings.png]]
 

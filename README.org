@@ -2,9 +2,8 @@
 Headers exchange play in order to understand them.
 
 ** RabbitPlay.Helper.test_publishes/0
-This function tries to implement the example for headers exchange
-explained in this [[https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html][post]] (that it seems to be wrong, so I'll explain how
-headers exchange work)
+This function implements an example similar to the headers exchange
+explained in this [[https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html][post]]
 
 * How Headers Exchange works
 This is a simple exercise to learn how to use ~headers exchange~.

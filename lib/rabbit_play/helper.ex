@@ -20,9 +20,22 @@ defmodule RabbitPlay.Helper do
 
   @routing_key ""
 
+  @type header_name :: String.t()
+  @type header_value :: String.t()
+  @type header :: {header_name, header_value}
+  @type queue_name :: String.t()
+  @type queue_config :: {queue_name, [header]}
+
   # Opens connection too
   def get_channel() do
     {:ok, conn} = Connection.open("amqp://#{@rabbit_user}:#{@rabbit_pass}@#{@rabbit_host}")
+    {:ok, chan} = Channel.open(conn)
+
+    {:ok, chan}
+  end
+
+  def get_channel(user, pass, host) do
+    {:ok, conn} = Connection.open("amqp://#{user}:#{pass}@#{host}")
     {:ok, chan} = Channel.open(conn)
 
     {:ok, chan}
@@ -45,6 +58,7 @@ defmodule RabbitPlay.Helper do
     end)
   end
 
+  @spec basic_setup(AMQP.Channel.t(), queue_config) :: atom()
   def basic_setup(chan, queues_and_arguments) do
     # Declare exchange
     :ok = Exchange.declare(chan, @exchange, :headers, durable: true)
@@ -60,6 +74,8 @@ defmodule RabbitPlay.Helper do
     |> Enum.each(fn {queue, arguments} ->
       Queue.bind(chan, queue, @exchange, arguments: arguments)
     end)
+
+    :ok
   end
 
   def publish_with_headers(chan, message, headers) do

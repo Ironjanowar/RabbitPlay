@@ -79,6 +79,33 @@ defmodule RabbitPlay.Helper do
     |> Enum.map(fn {queue, _} -> Queue.delete(chan, queue) end)
   end
 
+  def exchange_to_exchange_test(chan) do
+    # Declare exchanges
+    ["message-router", "notifications-router"]
+    |> Enum.each(fn exchange_name ->
+      Exchange.declare(chan, exchange_name, :topic, durable: true)
+    end)
+
+    # Declare queues
+    ["notifications-sms", "notifications-push", "rules"]
+    |> Enum.each(fn queue ->
+      Queue.declare(chan, queue, durable: true)
+    end)
+
+    # Bind exchanges
+    Exchange.bind(chan, "notifications-router", "message-router", routing_key: "notifications.*")
+
+    # Bind queues
+    [
+      {"notifications-sms", "notifications-router", "notifications.sms"},
+      {"notifications-push", "notifications-router", "notifications.push"},
+      {"rules", "message-router", "rules"}
+    ]
+    |> Enum.each(fn {queue, exchange, topic} ->
+      Queue.bind(chan, queue, exchange, routing_key: topic)
+    end)
+  end
+
   def test_publishes() do
     consumer_1_config = %{
       name: "Consumer1",

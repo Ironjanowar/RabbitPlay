@@ -27,7 +27,7 @@ use AMQP
 {:ok, conn} = Connection.open("amqp://guest:guest@localhost")
 {:ok, chan} = Channel.open(conn)
 #+END_SRC
-(Suposing that we have a RabbitMQ server in localhost with the user
+(Supposing that we have a RabbitMQ server in localhost with the user
 ~guest~ and password ~guest~)
 
 After that, we need some queues, lets say:
@@ -128,7 +128,7 @@ This will be queue_a:
 
 [[./images/second_time_queue_a.png]]
 
-And this well be queue_b:
+And this will be queue_b:
 
 [[./images/second_time_queue_b.png]]
 
